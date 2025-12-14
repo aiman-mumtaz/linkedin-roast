@@ -12,19 +12,18 @@ A brutally honest roasting tool for LinkedIn profiles. This app uses AI to gener
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 + React + Tailwind CSS
+- **Frontend**: Next.js 16 + React 19 + Tailwind CSS
 - **Backend**: Next.js API Routes
-- **AI**: Groq API (LLaMA 3.3 70B)
-- **Web Scraping**: Playwright
-- **Animation**: Custom CSS animations
+- **AI**: Groq API (llama-3.3-70b-versatile)
+- **Animation**: Native CSS animations (keyframes)
+- **Deployment**: Vercel (with GitHub integration)
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- LinkedIn account credentials
-- Groq API key
+- Groq API key (get one at https://console.groq.com)
 
 ### Installation
 
@@ -35,18 +34,15 @@ cd linkedin-roaster
 ```
 
 2. Install dependencies:
+2. Install dependencies:
 ```bash
 npm install
-npx playwright install
 ```
 
 3. Set up environment variables in `.env.local`:
 ```env
 GROQ_API_KEY=your_groq_api_key_here
-LINKEDIN_EMAIL=your_linkedin_email@example.com
-LINKEDIN_PASSWORD=your_linkedin_password
 ```
-
 4. Run the development server:
 ```bash
 npm run dev
@@ -61,17 +57,6 @@ npm run dev
 3. Profile text is sent to Groq's API with a custom prompt
 4. AI generates a brutal, personalized roast
 5. Roast is displayed with smooth animations
-
-## Roasting Features
-
-The roaster specifically targets:
-- Career stagnation (same role 2+ years)
-- Skill inflation vs. actual qualifications
-- Buzzword abuse ("synergy", "disruptive", "innovative")
-- Humble-bragging and fake humility
-- False leadership claims without actual management experience
-- Weak educational background with inflated claims
-- Generic, vague accomplishments
 
 ## API Endpoints
 
@@ -101,9 +86,10 @@ Generate a roast for a LinkedIn profile or custom text.
 
 ## Performance Notes
 
-- First roast (with login): ~20-30 seconds
-- Subsequent roasts: ~10-15 seconds (uses cached auth)
 - API response time: ~3-5 seconds
+- No authentication delays (no scraping required)
+- Lightweight, privacy-respecting architecturefiles
+- No hate speech, slurs, or protected class attacks
 
 ## Legal & Ethical
 
@@ -119,7 +105,7 @@ Generate a roast for a LinkedIn profile or custom text.
 - [ ] Share roasts on social media
 - [ ] Roast history/favorites
 - [ ] Multi-language support
-- [ ] Web app deployment on Vercel
+- [ ] Analytics dashboard
 
 ## License
 
