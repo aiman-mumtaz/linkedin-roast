@@ -74,7 +74,6 @@ async function getAuthenticatedContext() {
       executablePath: await chromium_serverless.executablePath(),
     };
   } else {
-    // Local Development Setup 
     try {
       const { chromium } = require('playwright');
       browserExecutable = chromium;
@@ -83,13 +82,11 @@ async function getAuthenticatedContext() {
     }
   }
 
-  // 3. Launch Browser and Create Context
   const browser = await browserExecutable.launch(launchOptions);
   const context = await browser.newContext(contextOptions);
 
   const page = await context.newPage();
 
-  // HIGH PERFORMANCE: Block non-essential resources
   await context.route('**/*', (route: Route) => {
     const resource = route.request().resourceType();
     if (resource === 'image' || resource === 'stylesheet' || resource === 'font') {
@@ -99,9 +96,6 @@ async function getAuthenticatedContext() {
     }
   });
 
-  // 4. Test Session State and Login
-  
-  // TRUSTING THE STATE: Skip the time-consuming navigation test
   if (storageStateObject) {
       console.log("Session state loaded successfully. Trusting state and bypassing login test.");
       await page.close();
@@ -109,7 +103,6 @@ async function getAuthenticatedContext() {
       return context;
   }
   
-  // Fallback: Manual login (only executes if state file was missing/failed to load)
   console.log("Storage state was NOT loaded. Performing manual login... (Will likely hit checkpoint)");
   
   const email = process.env.LINKEDIN_EMAIL;
