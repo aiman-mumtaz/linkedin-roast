@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-// Import playwright-core for types and the chromium executable reference
-import { chromium as playwrightChromium, Route } from "playwright-core";
-// Import the serverless optimized chromium package
+import { chromium as playwrightChromium, Route } from "playwright-core"; 
+// Final TypeScript Fix: Revert to the default import
 import chromium_serverless from "@sparticuz/chromium"; 
-
-// --- Conditional Imports for Local Development ---
-// We use 'require' here inside the function to avoid errors when bundling for Netlify.
-// We only import the full 'playwright' package if NOT in production.
 
 // Shared context cache
 let cachedContext: any = null;
+// Global flag to ensure setupChromium only runs once per function instance
+let isChromiumSetup = false; 
 
 async function getAuthenticatedContext() {
     // If context already exists and is valid, reuse it
@@ -35,17 +32,29 @@ async function getAuthenticatedContext() {
         }
     }
 
-    // --- Conditional Launch Logic ---
+    // --- Conditional Launch Logic for Local vs. Production ---
     const isProduction = process.env.NODE_ENV === 'production' || process.env.NETLIFY === 'true';
 
-    // 1. Launch Options (related to the executable itself)
+    // 1. Production Setup: Copy binary to /tmp (Fixes "directory does not exist" error)
+    if (isProduction && !isChromiumSetup) {
+        // FINAL TypeScript FIX: Cast the object to 'any' to access setupChromium
+        if (typeof (chromium_serverless as any).setupChromium === 'function') {
+            await (chromium_serverless as any).setupChromium(); 
+            isChromiumSetup = true;
+            console.log("Chromium setup completed in /tmp.");
+        } else {
+            console.error("Error: setupChromium function not found on chromium_serverless object.");
+            throw new Error("Critical serverless dependency function missing.");
+        }
+    }
+
+    // 2. Launch Options (related to the executable itself)
     let launchOptions: any = {
         headless: true,
     };
     
-    // 2. Context Options (related to the browser session/page)
+    // 3. Context Options (related to the browser session/page)
     const contextOptions = {
-        // Properties moved here (TypeScript Fix):
         ignoreHTTPSErrors: true,
         slowMo: 0, 
     };
@@ -57,17 +66,18 @@ async function getAuthenticatedContext() {
         launchOptions = {
             ...launchOptions,
             args: chromium_serverless.args,
+            // executablePath now points to the location setup by setupChromium()
             executablePath: await chromium_serverless.executablePath(),
         };
     } else {
-        // Local/Development Configuration (uses locally installed Playwright package)
+        // Local/Development Configuration
         try {
-            // We use require to load the full 'playwright' package only when needed locally
+            // Use require to load the full 'playwright' package for local machine
             const { chromium } = require('playwright');
             browserExecutable = chromium;
         } catch (e) {
             console.error("Local Playwright dependency failed to load. Did you run 'npm install playwright' and 'npx playwright install'?", e);
-            throw new Error("Local environment setup failed.");
+            throw new Error("Local environment setup failed. Check instructions.");
         }
     }
     // --- End Conditional Logic ---
@@ -171,7 +181,7 @@ export async function POST(request: Request) {
             console.error("Error scraping LinkedIn:", error);
             cachedContext = null; 
             return NextResponse.json(
-                { error: "Failed to fetch LinkedIn profile. Please ensure Netlify environment variables are set and the function is not timing out." },
+                { error: "Failed to fetch LinkedIn profile. Please ensure Netlify environment variables are set and the function is not timing out. (Internal Scrape Error Logged)" },
                 { status: 400 }
             );
         }
