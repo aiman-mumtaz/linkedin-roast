@@ -58,7 +58,6 @@ export async function POST(request: Request) {
 
     let profileData = "";
 
-    // If it's a URL, scrape the profile
     if (profile.includes("linkedin.com")) {
         try {
             const context = await getAuthenticatedContext();
@@ -121,7 +120,7 @@ export async function POST(request: Request) {
                 - Point out generic buzzwords (\"synergy\", \"innovative\", \"disruptive\") as cover for actual mediocrity
                 - If they claim to be a \"leader\" but have never managed anyone, annihilate them
                 - Be personal, specific to THEIR profile details - name their actual company, role, or claims
-                - Keep it SHORT - 2-3 punchy sentences max
+                - Keep it SHORT - 4 to 5 punchy sentences max
                 - Sprinkle in emojis 😂🔥💀😭🚩🤡
                 - Write as one flowing paragraph
                 - No slurs, no hate, no protected classes
