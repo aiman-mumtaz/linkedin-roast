@@ -1,45 +1,51 @@
-// app/api/roast/route.ts
-
 import { NextResponse } from "next/server";
 import { chromium as playwrightChromium, Route } from "playwright-core";
 import chromium_serverless from "@sparticuz/chromium";
-import * as path from 'path'; // 💡 NEW: Import path module
-import * as fs from 'fs';   // 💡 NEW: Import file system module
+import * as path from 'path';
+import * as fs from 'fs';
 
-// Shared context cache. 
+// Shared context cache. Crucial for subsequent requests.
 let cachedContext: any = null;
-let savedStorageState: string | undefined = undefined; // 💡 NEW: Variable to hold the JSON file content
+// CRITICAL FIX: Store the parsed JavaScript Object, not the raw string.
+let savedStorageState: object | undefined = undefined; 
 
-// 💡 NEW FUNCTION: Read the storage state file once on cold start
-function loadStorageState() {
+/**
+ * Reads the 'linkedin_state.json' file content, parses it, and caches the object.
+ * This function runs on every invocation but only reads the file once (on cold start).
+ */
+function loadStorageState(): object | undefined {
   if (savedStorageState) {
     return savedStorageState;
   }
   
   try {
-    // 1. Determine the correct file path. 
-    // In Netlify/Next.js environment, files in the root are accessible via the execution directory.
-    // We assume the file is correctly placed in the root directory by the build system.
+    // Determine the correct file path relative to the execution environment (process.cwd())
     const filePath = path.join(process.cwd(), 'linkedin_state.json');
     
-    // 2. Read the file synchronously (safe on cold start)
-    savedStorageState = fs.readFileSync(filePath, 'utf-8');
-    console.log("Successfully loaded storage state file content.");
+    // Read the file content as a STRING
+    const fileContentString = fs.readFileSync(filePath, 'utf-8');
+    
+    // CRITICAL FIX: PARSE THE STRING INTO A JAVASCRIPT OBJECT 
+    // Playwright needs the object, not the path or the raw string content.
+    savedStorageState = JSON.parse(fileContentString);
+    
+    console.log("Successfully loaded and PARSED storage state object.");
     return savedStorageState;
   } catch (e) {
-    console.error("CRITICAL: Failed to load linkedin_state.json. Check file path and existence.", e);
-    // If loading fails, let the function continue, but it will try the manual login (which will likely hit the checkpoint).
+    console.error("CRITICAL: Failed to load or parse linkedin_state.json. Check file path, JSON format, and ensure the file is committed.", e);
+    // If loading fails, fall back to undefined, forcing the manual login attempt below.
     return undefined;
   }
 }
 
 /**
- * Initializes or reuses an authenticated Playwright context.
+ * Initializes or reuses an authenticated Playwright context by loading a saved session state.
  */
 async function getAuthenticatedContext() {
-  // 1. Re-use cached context (no change)
+  // 1. Re-use cached context
   if (cachedContext) {
     try {
+      // QUICK TEST: Check if the context is alive.
       const page = await cachedContext.newPage();
       await page.goto("about:blank", { timeout: 1000 });
       await page.close();
@@ -55,18 +61,17 @@ async function getAuthenticatedContext() {
   const isProduction = process.env.NODE_ENV === 'production' || process.env.NETLIFY === 'true';
 
   let launchOptions: any = { headless: true, timeout: 25000 };
-
-  // 💡 FIX: Load the storage state content here
-  const storageStateContent = isProduction ? loadStorageState() : undefined;
+  
+  // FIX: Load the storage state OBJECT here
+  const storageStateObject = isProduction ? loadStorageState() : undefined;
 
   const contextOptions: any = {
     ignoreHTTPSErrors: true,
     slowMo: 0,
-    // CRITICAL FIX: Pass the JSON content (string) to Playwright, not a file path
-    storageState: storageStateContent, 
+    // CRITICAL FIX: Pass the actual JAVASCRIPT OBJECT to storageState
+    storageState: storageStateObject, 
   };
   
-  // ... (rest of launch setup remains the same) ...
   let browserExecutable = playwrightChromium;
 
   if (isProduction) {
@@ -91,7 +96,7 @@ async function getAuthenticatedContext() {
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
 
-  // ... (Blocking resources remains here) ...
+  // HIGH PERFORMANCE: Block non-essential resources on the context level
   await context.route('**/*', (route: Route) => {
     const resource = route.request().resourceType();
     if (resource === 'image' || resource === 'stylesheet' || resource === 'font') {
@@ -100,7 +105,6 @@ async function getAuthenticatedContext() {
       route.continue();
     }
   });
-
 
   // 4. Test Session State and Login
   console.log("Testing saved session state...");
@@ -143,7 +147,6 @@ async function getAuthenticatedContext() {
     console.log("Login successful via URL check.");
     
   } catch (e) {
-    // ... (Fallback logic and checkpoint error handling remains the same) ...
     try {
         await page.waitForSelector('nav[aria-label="Primary"] a[href="/feed/"]', { timeout: 10000 });
         console.log("Login successful via element check.");
@@ -153,18 +156,15 @@ async function getAuthenticatedContext() {
         console.error("Login failed: Checkpoint detected. URL:", currentUrl);
         await context.close();
         await browser.close();
-        throw new Error(`Login failed: Checkpoint detected at ${currentUrl}. The file loading failed.`);
+        throw new Error(`Login failed: Checkpoint detected at ${currentUrl}. Check credentials or 'linkedin_state.json'.`);
     }
   }
-  
-  // --- Removed saving state since it won't work in this environment ---
 
   await page.close();
   cachedContext = context;
   return context;
 }
 
-// ... (POST handler and Groq logic remain unchanged) ...
 export async function POST(request: Request) {
   const { profile } = await request.json();
   let profileData = "";
