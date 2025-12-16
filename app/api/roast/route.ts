@@ -94,6 +94,10 @@ async function getAuthenticatedContext() {
   // 3. Launch Browser and Create Context
   const browser = await browserExecutable.launch(launchOptions);
   const context = await browser.newContext(contextOptions);
+  
+  // 💡 NEW: Wait for a moment after context creation to ensure stability
+  await new Promise(resolve => setTimeout(resolve, 500)); 
+
   const page = await context.newPage();
 
   // HIGH PERFORMANCE: Block non-essential resources on the context level
@@ -176,6 +180,9 @@ export async function POST(request: Request) {
     try {
       context = await getAuthenticatedContext(); 
       page = await context.newPage();
+      
+      // 💡 NEW: Wait a moment before navigating the new page
+      await page.waitForTimeout(500); 
 
       let profileUrl = profile;
       if (!profileUrl.startsWith("http")) {
@@ -183,7 +190,8 @@ export async function POST(request: Request) {
       }
       
       console.log(`Scraping profile: ${profileUrl}`);
-      await page.goto(profileUrl, { waitUntil: "domcontentloaded", timeout: 15000 });
+      // 💡 INCREASE TIMEOUT: Give navigation more time, just in case.
+      await page.goto(profileUrl, { waitUntil: "domcontentloaded", timeout: 30000 }); 
       
       await page.waitForTimeout(1000); 
 
