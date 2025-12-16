@@ -47,11 +47,15 @@ export default function Home() {
             <h1 className="text-4xl font-bold text-gray-100 mb-2">
               Profile Roaster
             </h1>
-            <p className="text-gray-400 text-base">Get a brutally honest roast of any LinkedIn profile</p>
+            <p className="text-gray-400 text-base">
+              Get a brutally honest roast of any LinkedIn profile
+            </p>
           </div>
 
           <div className="space-y-2 mb-6">
-            <label className="block text-sm font-semibold text-gray-300">LinkedIn Profile URL</label>
+            <label className="block text-sm font-semibold text-gray-300">
+              LinkedIn Profile URL
+            </label>
             <input
               type="text"
               className="w-full px-4 py-2.5 border border-slate-600 rounded-lg bg-slate-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
@@ -64,14 +68,38 @@ export default function Home() {
           <button
             onClick={generateRoast}
             disabled={loading}
-            className="w-full py-2.5 px-6 rounded-full bg-blue-600 text-white font-semibold text-base hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+            className="w-full py-2.5 px-6 rounded-full bg-blue-600 text-white font-semibold text-base hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center"
           >
+            {loading && (
+              <svg
+                className="animate-spin h-5 w-5 mr-3 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+            )}
             {loading ? "Generating..." : "Roast This Profile"}
           </button>
 
           {roast && (
             <div className="mt-6 bg-slate-800 rounded-lg p-6 text-gray-100 leading-relaxed animate-fade-in border border-slate-700 shadow-lg">
-              <p className="text-sm font-bold text-blue-400 uppercase tracking-wide mb-4">Your Roast</p>
+              <p className="text-sm font-bold text-blue-400 uppercase tracking-wide mb-4">
+                Your Roast
+              </p>
               <div className="space-y-4">
                 {roast.split(". ").map((sentence, idx) => (
                   <p key={idx}>
