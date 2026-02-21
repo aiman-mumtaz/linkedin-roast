@@ -10,10 +10,8 @@ export async function POST(request: Request) {
     const apifyToken = process.env.APIFY_TOKEN;
     const groqKey = process.env.GROQ_API_KEY;
 
-    console.log(`🚀 Starting stable scrape for: ${profile}`);
+    console.log(`Starting stable scrape for: ${profile}`);
 
-
-    // 'supreme_coder~linkedin-profile-scraper' Apify actor - limited fields for performance
     const apifyUrl = `https://api.apify.com/v2/acts/supreme_coder~linkedin-profile-scraper/run-sync-get-dataset-items?token=${apifyToken}&fields=firstName,headline,summary,positions,educations,certifications,skills,projects,followersCount,isVerified,volunteerExperiences`;
 
     const apifyResponse = await fetch(apifyUrl, {
