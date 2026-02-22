@@ -7,7 +7,6 @@ A brutally honest, dual-platform roasting tool. This app uses AI to generate wit
 - **Dual-Mode UI** - Brand-matching themes for both LinkedIn (Corporate Blue) and GitHub (Dev Green) with a unified Design System
 - **AI-Powered Roasting** - Uses Groq's LLaMA 3.3 model to generate brutal, witty roasts
 - **LinkedIn Profile Scraping** - Automatically fetches and analyzes LinkedIn profiles
-- **Dark Mode UI** - LinkedIn-inspired dark theme with smooth animations
 - **Fast & Efficient** - Cached authentication for quick roast generation
 - **Personal Roasts** - Each roast is tailored to specific profile details, not generic
 
