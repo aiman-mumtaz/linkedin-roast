@@ -36,8 +36,8 @@ The app is now structured to support parallel platform experiences:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/aiman-mumtaz/linkedin-roaster.git
-cd linkedin-roaster
+git clone https://github.com/aiman-mumtaz/profile-roast.git
+cd profile-roast
 ```
 
 2. Install dependencies:
