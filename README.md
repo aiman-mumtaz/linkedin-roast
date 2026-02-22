@@ -17,7 +17,7 @@ A brutally honest, dual-platform roasting tool. This app uses AI to generate wit
 - **Backend**: Next.js API Routes
 - **AI**: Groq API (llama-3.3-70b-versatile)
 - **Animation**: Native CSS animations (keyframes)
-- **Deployment**: Vercel (with GitHub integration)
+- **Deployment**: Netlify (with GitHub integration)
 
 ## Navigation Structure
 The app is now structured to support parallel platform experiences:
